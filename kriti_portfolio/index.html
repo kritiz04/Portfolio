@@ -73,7 +73,7 @@
   }
   @keyframes slideDown { from { transform: translateY(-100%); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
 
-  .nav-logo {
+.nav-logo {
     font-family: 'Cormorant Garamond', serif;
     font-size: 1.5rem; font-weight: 600; letter-spacing: 0.02em;
     color: var(--text-dark);
@@ -93,6 +93,51 @@
   }
   .nav-links a:hover { color: var(--lavender-600); }
   .nav-links a:hover::after { width: 100%; }
+
+  .nav-toggle {
+    display: none;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 999px;
+    border: 1px solid var(--soft-lilac);
+    background: rgba(255,255,255,0.8);
+    cursor: pointer;
+    padding: 0;
+    margin-left: 20px;
+    box-shadow: 0 4px 18px rgba(15,23,42,0.08);
+  }
+  .nav-toggle-bar {
+    position: relative;
+    width: 18px;
+    height: 2px;
+    border-radius: 999px;
+    background: var(--text-mid);
+    transition: background 0.2s;
+  }
+  .nav-toggle-bar::before,
+  .nav-toggle-bar::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    width: 18px;
+    height: 2px;
+    border-radius: 999px;
+    background: var(--text-mid);
+    transition: transform 0.25s ease, top 0.25s ease, bottom 0.25s ease;
+  }
+  .nav-toggle-bar::before { top: -5px; }
+  .nav-toggle-bar::after { bottom: -5px; }
+  nav.nav-open .nav-toggle-bar { background: transparent; }
+  nav.nav-open .nav-toggle-bar::before {
+    top: 0;
+    transform: rotate(45deg);
+  }
+  nav.nav-open .nav-toggle-bar::after {
+    bottom: 0;
+    transform: rotate(-45deg);
+  }
 
   /* ─── SECTIONS ─── */
   section { padding: 100px 60px; max-width: 1200px; margin: 0 auto; }
@@ -525,9 +570,28 @@
 
   /* ─── RESPONSIVE ─── */
   @media (max-width: 900px) {
-    nav { padding: 18px 28px; }
-    .nav-links { gap: 20px; }
-    section { padding: 80px 28px; }
+    nav {
+      padding: 18px 24px;
+      gap: 12px;
+    }
+    .nav-toggle { display: inline-flex; }
+    .nav-links {
+      position: fixed;
+      top: 70px;
+      right: 20px;
+      flex-direction: column;
+      gap: 14px;
+      background: rgba(255,255,255,0.96);
+      backdrop-filter: blur(18px);
+      padding: 16px 20px;
+      border-radius: 18px;
+      box-shadow: var(--shadow-lg);
+      border: 1px solid var(--glass-border);
+      min-width: 190px;
+      display: none;
+    }
+    nav.nav-open .nav-links { display: flex; }
+    section { padding: 80px 24px; }
     #hero { flex-direction: column-reverse; align-items: center; text-align: center; padding-top: 120px; }
     .hero-desc { margin: 0 auto; }
     .hero-btns { justify-content: center; }
@@ -540,10 +604,12 @@
     .contact-inner { padding: 60px 28px; }
   }
   @media (max-width: 600px) {
+    section { padding: 72px 20px; }
+    #hero { padding-top: 110px; }
+    .scroll-hint { display: none; }
     .achievements-grid { grid-template-columns: 1fr; }
-    nav { padding: 16px 20px; }
-    .nav-links { gap: 14px; }
-    .nav-links a { font-size: 0.72rem; }
+    nav { padding: 14px 18px; }
+    .nav-links a { font-size: 0.74rem; }
   }
 </style>
 </head>
@@ -556,6 +622,9 @@
 
 <nav>
   <a href="#hero" class="nav-logo">Kriti <span>Saxena</span></a>
+  <button class="nav-toggle" aria-label="Toggle navigation">
+    <span class="nav-toggle-bar"></span>
+  </button>
   <ul class="nav-links">
     <li><a href="#about">About</a></li>
     <li><a href="#experience">Experience</a></li>
@@ -824,6 +893,8 @@
   // Nav active state
   const sections = document.querySelectorAll('section[id]');
   const navLinks = document.querySelectorAll('.nav-links a');
+  const nav = document.querySelector('nav');
+  const navToggle = document.querySelector('.nav-toggle');
   window.addEventListener('scroll', () => {
     let current = '';
     sections.forEach(sec => {
@@ -834,6 +905,20 @@
       a.style.color = a.getAttribute('href') === '#' + current ? 'var(--lavender-600)' : '';
     });
   });
+
+  // Mobile nav toggle
+  if (navToggle) {
+    navToggle.addEventListener('click', () => {
+      nav.classList.toggle('nav-open');
+    });
+
+    // Close menu when a link is clicked
+    navLinks.forEach(link => {
+      link.addEventListener('click', () => {
+        nav.classList.remove('nav-open');
+      });
+    });
+  }
 
   // Smooth parallax on hero orbs
   window.addEventListener('mousemove', (e) => {
